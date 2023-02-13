@@ -81,7 +81,7 @@ for tick in range(runTime):
 fig = plt.gcf()
 ax = fig.gca()
 
-vanXY = np.zeros((runTime, numberOfVans))
+vanXY = np.zeros((runTime * 4, numberOfVans))
 graphVans = []
 # for n in range(numberOfVans):
 #     vanXY[:,n] = [ for i in range(runTime)]
@@ -97,14 +97,20 @@ graphVans = []
 #
 #     return graphVans.values()
 
-#
-# def anim_interp(x, nx, time):
-#     xx = scipy.interpolate.interp1d(x, nx)
-#     return xx
-#
-#
+#interpolate coordinates between two point with time as percentage
+# time = .5 = halfway between
+def anim_interp(a, b, time, pos):
+    a = (pos[a][0],pos[a][1])
+    b = (pos[b][0],pos[b][1])
+    newab = tuple(np.subtract(b,a))
+    newab = tuple(i * time for i in newab)
+    newab = tuple(np.add(a, newab))
+    return newab
+
+
 # circle = plt.Circle((anim_interp(pos[1][0], pos[4][0], .5), anim_interp(pos[1][1], pos[4][1], .5)), .05, zorder = 10)
-circle = plt.Circle((pos[1][0], pos[1][1]), .05, zorder = 10)
+circle = plt.Circle((anim_interp(0, 3, .5, pos)), .05, zorder = 10)
+circle.center = anim_interp(0, 3, 1, pos)
 ax.add_patch(circle)
 
 #animation = FuncAnimation(G, func=anim_run, frames = np.arange()), interval=10)
