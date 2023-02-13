@@ -1,16 +1,43 @@
-# This is a sample Python script.
+class Van:
+    R = []
+    S = []
+class Person:
+    pLocation = 0
+    dLocation = 0
+    inVan = "false"
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import networkx as nx
+seed=1000           # seed the graph for reproducibility, you should be doing this
+G= nx.gnp_random_graph (10, .3, seed=seed )       # here we create a random binomial graph with 10 nodes and an average (expected) connectivity of 10*.3= 3.
+print ( G.nodes() )
 
+nx.is_connected(G)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+print(G.edges())
 
+import matplotlib.pyplot as plt
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# some properties
+print("node degree and node clustering")
+for v in nx.nodes(G):
+    print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+print()
+print("the adjacency list")
+for line in nx.generate_adjlist(G):
+    print(line)
+
+links = [(u, v) for (u, v, d) in G.edges(data=True)]
+pos = nx.nx_pydot.graphviz_layout(G)
+nx.draw_networkx_nodes(G, pos, node_size=1200, node_color='lightblue', linewidths=0.25) # draw nodes
+nx.draw_networkx_edges(G, pos, edgelist=links, width=4)                                 # draw edges
+
+# node labels
+nx.draw_networkx_labels(G, pos, font_size=20, font_family="sans-serif")
+# edge weight labels
+
+edge_labels = nx.get_edge_attributes(G, "weight")
+print(edge_labels)
+nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
+plt.show()
