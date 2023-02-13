@@ -1,16 +1,12 @@
-class Van:
-    R = []
-    S = []
-class Person:
-    pLocation = 0
-    dLocation = 0
-    inVan = "false"
-
+import numpy as np
+import scipy.interpolate
+### Tutorial Block
 import networkx as nx
 from networkx.drawing.nx_agraph import write_dot
 from networkx.drawing.nx_pydot import write_dot
 seed=1000           # seed the graph for reproducibility, you should be doing this
-G= nx.gnp_random_graph (10, .3, seed=seed )       # here we create a random binomial graph with 10 nodes and an average (expected) connectivity of 10*.3= 3.
+numberOfNodes = 10
+G= nx.gnp_random_graph (numberOfNodes, .3, seed=seed )       # here we create a random binomial graph with 10 nodes and an average (expected) connectivity of 10*.3= 3.
 print ( G.nodes() )
 
 print(nx.is_connected(G))
@@ -18,6 +14,7 @@ print(nx.is_connected(G))
 print(G.edges())
 
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # some properties
 print("node degree and node clustering")
@@ -30,7 +27,7 @@ for line in nx.generate_adjlist(G):
     print(line)
 
 links = [(u, v) for (u, v, d) in G.edges(data=True)]
-pos = nx.kamada_kawai_layout(G)
+pos = nx.kamada_kawai_layout(G, dim= 2)
 nx.drawing.draw_networkx_nodes(G, pos, node_size=1200, node_color='lightblue', linewidths=0.25) # draw nodes
 nx.drawing.draw_networkx_edges(G, pos, edgelist=links, width=4)                                 # draw edges
 
@@ -41,6 +38,81 @@ nx.draw_networkx_labels(G, pos, font_size=20, font_family="sans-serif")
 edge_labels = nx.get_edge_attributes(G, "weight")
 print(edge_labels)
 nx.draw_networkx_edge_labels(G, pos, edge_labels)
+### End Tutorial Block
+
+### Start Algorithms
+import random
+
+### Class Declarations
+class Van:
+    def __init__(self, startPos):
+        self.currentNode = startPos
+        self.Hist = [startPos]
+
+    nextNode = 0
+    R = []
+    S = []
+class Person:
+    def __init__(self, pickUp, dropOff):
+        pLocation = pickUp
+        dLocation = dropOff
+    inVan = "false"
+
+#initialize vans here
+numberOfVans = 1 # set to 30 later
+van = []
+for i in range(numberOfVans):
+    van.append(Van(random.randrange(numberOfNodes)))
+
+van[0].Hist.pop()
+van[0].Hist.append(2)
+van[0].Hist.append(8)
+van[0].Hist.append(1)
+van[0].Hist.append(4)
+van[0].Hist.append(9)
+
+runTime = 100 #number of ticks
+#ticks script here
+for tick in range(runTime):
+    break #replace with alg code
+
+
+### ANIMATION
+fig = plt.gcf()
+ax = fig.gca()
+
+vanXY = np.zeros((runTime, numberOfVans))
+graphVans = []
+# for n in range(numberOfVans):
+#     vanXY[:,n] = [ for i in range(runTime)]
+#     graphVans[n] = plt.Circle((vanXY[0,n], 1), 1)
+# def anim_init():
+#     for n in range(numberOfVans):
+#         ax.add_path(graphVans[0,n], 1)
+#     return graphVans.values()
+
+#
+# def anim_run(i):
+#     for n in range(numberOfVans):
+#
+#     return graphVans.values()
+
+#
+# def anim_interp(x, nx, time):
+#     xx = scipy.interpolate.interp1d(x, nx)
+#     return xx
+#
+#
+# circle = plt.Circle((anim_interp(pos[1][0], pos[4][0], .5), anim_interp(pos[1][1], pos[4][1], .5)), .05, zorder = 10)
+circle = plt.Circle((pos[1][0], pos[1][1]), .05, zorder = 10)
+ax.add_patch(circle)
+
+#animation = FuncAnimation(G, func=anim_run, frames = np.arange()), interval=10)
+
+
+
+
+
 
 plt.show()
 
