@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from matplotlib.animation import FuncAnimation
 
 
@@ -57,8 +58,8 @@ class Van:
     S = []
 class Person:
     def __init__(self, pickUp, dropOff):
-        pLocation = pickUp
-        dLocation = dropOff
+        self.pLocation = pickUp
+        self.dLocation = dropOff
     inVan = "false"
 
 
@@ -72,11 +73,57 @@ def anim_lerp(a, b, time, pos):
     newab = tuple(np.add(a, newab))
     return newab
 
+def generatePeople(people):
+    # need 7.5 people needing rides per tick
+    if (random.randint(0, 1) == 1):
+        # make 8 people
+        for i in range(8):
+            # generate random pickup & dropoff
+            pickup = random.randint(0, 9)
+            dropoff = random.randint(0, 9)
+            # make sure they are different
+            while pickup == dropoff:
+                dropoff = random.randint(0, 9)
+            # create person and add to waitlist
+            guy = Person(pickup, dropoff)
+            people.append(guy)
+    else:
+        # make 7 people
+        for i in range(7):
+            # generate random pickup & dropoff
+            pickup = random.randint(0, 9)
+            dropoff = random.randint(0, 9)
+            # make sure they are different
+            while pickup == dropoff:
+                dropoff = random.randint(0, 9)
+            # create person and add to waitlist
+            guy = Person(pickup, dropoff)
+            people.append(guy)
+
+def assignVan(people, van):
+    cost = 9999 # set cost high
+    while people: # while people are still on waitlist
+        x = people.pop() # remove person from waitlist
+        for y in van: # run through vans
+            tempCost = nx.astar_path_length(G, y.currentNode, x.pLocation) # find a* path cost
+            if tempCost < cost: # if the cost of the new path is less than the current cost, set this as new shortest path
+                tempVan = y
+        tempVan.R.append(x) # add person to R list
+    for x in van: # print R list
+        print("R:")
+        for y in x.R:
+            print(y.pLocation)
+
+
 #initialize vans here
 numberOfVans = 1 # set to 30 later
 van = []
 for i in range(numberOfVans):
     van.append(Van(random.randrange(numberOfNodes)))
+
+#initialize list of people
+people = []
+
 
 # van[0].Hist.pop()
 # van[0].Hist.append(2)
@@ -90,10 +137,17 @@ runTime = 100 #number of ticks
 for tick in range(runTime * 4):
     if(tick % 4 == 0): # every 4 "ticks" = 1 clock tick
         #insert scripts for every tick here
+        generatePeople(people)
+
         print("Tick: " + str(tick / 4))
     if(tick % 16 == 0):
         #insert scripts for every 4 clock ticks here
         print("4thTick: " + str(tick / 16))
+        assignVan(people, van)
+        for x in people:
+            print(x.pLocation, " " , x.dLocation)
+            people.pop()
+
     #animation scripts here
     # records each location of van for each tick
     for i in range(numberOfVans):
