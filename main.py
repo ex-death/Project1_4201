@@ -67,8 +67,8 @@ class Person:
 def anim_lerp(a, b, time, pos):
     a = (pos[a][0],pos[a][1])
     b = (pos[b][0],pos[b][1])
-    newab = tuple(np.subtract(b,a))
-    newab = tuple(i * time for i in newab)
+    newab = tuple(np.subtract(b, a))
+    newab = tuple(j * time for j in newab)
     newab = tuple(np.add(a, newab))
     return newab
 
@@ -104,10 +104,9 @@ for tick in range(runTime * 4):
 fig = plt.gcf()
 ax = fig.gca()
 
-# vanXY = np.zeros((runTime * 4, numberOfVans))
 graphVans = {}
 for n in range(numberOfVans):
-    graphVans[n] = plt.Circle((van[n].xyData[0]), .05)
+    graphVans[n] = plt.Circle((van[n].xyData[0]), .05, zorder=10)
 
 
 def anim_init():
@@ -127,7 +126,7 @@ def anim_run(i):
 # circle.center = anim_lerp(0, 3, 1, pos)
 # ax.add_patch(circle)
 
-anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=10)
+anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=150)
 
 plt.show()
 
