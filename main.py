@@ -60,7 +60,7 @@ class Person:
     def __init__(self, pickUp, dropOff):
         self.pLocation = pickUp
         self.dLocation = dropOff
-    inVan = "false"
+    inVan = False
 
 
 # interpolate coordinates between two point with time as percentage
@@ -197,14 +197,16 @@ for tick in range(runTime * 4):
         #insert scripts for every tick here
         generatePeople(people)
         for x in range(numberOfVans):
-            if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
-                #set nextnode as first element in path from current node to first S location
+            if len(van[x].S) > 0 & van[x].mid == False: # if location scheduled in S, set nextNode to next in path
+                # set nextnode as first element in path from current node to first S location
                 van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0])[0]
             if len(van[x].R) > 0: #check contents of R, if not empty, schedule
                 schedule(van[x])
             if van[x].nextNode == van[x].currentNode & van[x].mid == True: # when van arrives to next node
-                van[x].S.pop() # pop node from S
+                van[x].mid = False
                 # do person is dropped off/picked up
+                # if van[x].S[0].inVan == True: # but s for person
+                #    van[x].S.pop() # pop node from S
             elif van[x].nextNode != van[x].currentNode & van[x].mid == False: # when van is 1 mile away, go halfway
                 van[x].mid = True
                 van[x].currentNode = van[x].nextNode
