@@ -60,7 +60,7 @@ class Person:
     def __init__(self, pickUp, dropOff):
         self.pLocation = pickUp
         self.dLocation = dropOff
-    inVan = False
+        self.inVan = False
 
 
 # interpolate coordinates between two point with time as percentage
@@ -77,7 +77,7 @@ def generatePeople(people):
     # need 7.5 people needing rides per tick
     if (random.randint(0, 1) == 1):
         # make 8 people
-        for i in range(8):
+        for i in range(2): # make 8 later
             # generate random pickup & dropoff
             pickup = random.randint(0, 9)
             dropoff = random.randint(0, 9)
@@ -89,7 +89,7 @@ def generatePeople(people):
             people.append(guy)
     else:
         # make 7 people
-        for i in range(7):
+        for i in range(2): #make 7 later
             # generate random pickup & dropoff
             pickup = random.randint(0, 9)
             dropoff = random.randint(0, 9)
@@ -109,37 +109,40 @@ def assignVan(people, van):
             if tempCost < cost: # if the cost of the new path is less than the current cost, set this as new shortest path
                 tempVan = y
         tempVan.R.append(x) # add person to R list
-    for x in van: # print R list
-        print("R:")
-        for y in x.R:
-            print(y.pLocation)
+   # for x in van: # print R list
+    #    print("R:")
+      #  for y in x.R:
+      #      print(y.pLocation)
 
-def schedule(van):
-    if len(van.R) == 1: # if only p1 in R queue
-        van.S.append(van.R.pop().pLocation) # append p1 pLocation to S
-    if len(van.R) == 2: # if p1 and p2 in R queue
-        t1 = van.R.pop().pLocation # t(#) for temp person pickup location, pops queue
-        t2 = van.R.pop().pLocation
-        p1 = nx.astar_path_length(G, van.currentNode, t1) # p(#) for the distance from van to corresponding pLocation
-        p2 = nx.astar_path_length(G, van.currentNode, t2)
+def pickupSchedule(van):
+    if len(van.R) == 1 & len(van.S) <=2: # if only p1 in R queue
+        print("Got Here 1")
+        van.S.append(van.R.pop(0)) # append p1 pLocation to S
+    if len(van.R) == 2 & len(van.S) <=1: # if p1 and p2 in R queue
+        print("Got Here 2")
+        t1 = van.R.pop(0) # t(#) for temp person pickup location, pops queue
+        t2 = van.R.pop(0)
+        p1 = nx.astar_path_length(G, van.currentNode, t1.pLocation) # p(#) for the distance from van to corresponding pLocation
+        p2 = nx.astar_path_length(G, van.currentNode, t2.pLocation)
         if p1 < p2: # if distance to p1 is less than distance to p2
             van.S.append(t1) # append p1 then p2 pLocation to S
             van.S.append(t2)
         else:
             van.S.append(t2)
             van.S.append(t1)
-    if len(van.R) == 3: # if p1, p2 and p3 in R queue
-        t1 = van.R.pop().pLocation
-        t2 = van.R.pop().pLocation
-        t3 = van.R.pop().pLocation
-        p1 = nx.astar_path_length(G, van.currentNode, t1)
-        p2 = nx.astar_path_length(G, van.currentNode, t2)
-        p3 = nx.astar_path_length(G, van.currentNode, t3)
+    if len(van.R) >= 3 & len(van.S) ==0 : # if p1, p2 and p3 in R queue
+        print("Got Here 3")
+        t1 = van.R.pop(0)
+        t2 = van.R.pop(0)
+        t3 = van.R.pop(0)
+        p1 = nx.astar_path_length(G, van.currentNode, t1.pLocation)
+        p2 = nx.astar_path_length(G, van.currentNode, t2.pLocation)
+        p3 = nx.astar_path_length(G, van.currentNode, t3.pLocation)
         if p1 < p2 & p1 < p3:
             van.S.append(t1)
 
-            tp2 = nx.astar_path_length(G, t1, t2)
-            tp3 = nx.astar_path_length(G, t1, t3)
+            tp2 = nx.astar_path_length(G, t1.pLocation, t2.pLocation)
+            tp3 = nx.astar_path_length(G, t1.pLocation, t3.pLocation)
 
             if tp2 < tp3:
                 van.S.append(t2)
@@ -150,8 +153,8 @@ def schedule(van):
         elif p2 < p1 & p2 < p3:
             van.S.append(t2)
 
-            tp1 = nx.astar_path_length(G, t2, t1)
-            tp3 = nx.astar_path_length(G, t2, t3)
+            tp1 = nx.astar_path_length(G, t2.pLocation, t1.pLocation)
+            tp3 = nx.astar_path_length(G, t2.pLocation, t3.pLocation)
 
             if tp1 < tp3:
                 van.S.append(t1)
@@ -162,8 +165,8 @@ def schedule(van):
         else:
             van.S.append(t3)
 
-            tp1 = nx.astar_path_length(G, t3, t1)
-            tp2 = nx.astar_path_length(G, t3, t2)
+            tp1 = nx.astar_path_length(G, t3.pLocation, t1.pLocation)
+            tp2 = nx.astar_path_length(G, t3.pLocation, t2.pLocation)
 
             if tp1 < tp2:
                 van.S.append(t1)
@@ -172,55 +175,50 @@ def schedule(van):
                 van.S.append(t2)
                 van.S.append(t1)
 
-
 #initialize vans here
 numberOfVans = 1 # set to 30 later
 van = []
 for i in range(numberOfVans):
-    van.append(Van(random.randrange(numberOfNodes)))
+    van.append(Van(random.randint(0, 9)))
 
 #initialize list of people
 people = []
 
-
-# van[0].Hist.pop()
-# van[0].Hist.append(2)
-# van[0].Hist.append(8)
-# van[0].Hist.append(1)
-# van[0].Hist.append(4)
-# van[0].Hist.append(9)
-
-runTime = 100 #number of ticks
+runTime = 20 #number of ticks, increase later
 #ticks script here - ticks * 4 to accomodate for animation
 for tick in range(runTime * 4):
+    if (tick % 16 == 0):
+        # insert scripts for every 4 clock ticks here
+        print("4thTick: " + str(tick / 16))
+        assignVan(people, van)
+        for x in range(numberOfVans):
+            if len(van[x].R) > 0:  # check contents of R, if not empty, schedule
+                pickupSchedule(van[x])
     if(tick % 4 == 0): # every 4 "ticks" = 1 clock tick
         #insert scripts for every tick here
         generatePeople(people)
         for x in range(numberOfVans):
-            if len(van[x].S) > 0 & van[x].mid == False: # if location scheduled in S, set nextNode to next in path
+            print("Van Location: ", van[x].currentNode)
+            if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
                 # set nextnode as first element in path from current node to first S location
-                van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0])[0]
-            if len(van[x].R) > 0: #check contents of R, if not empty, schedule
-                schedule(van[x])
-            if van[x].nextNode == van[x].currentNode & van[x].mid == True: # when van arrives to next node
-                van[x].mid = False
-                # do person is dropped off/picked up
-                # if van[x].S[0].inVan == True: # but s for person
-                #    van[x].S.pop() # pop node from S
-            elif van[x].nextNode != van[x].currentNode & van[x].mid == False: # when van is 1 mile away, go halfway
-                van[x].mid = True
-                van[x].currentNode = van[x].nextNode
+                if (van[x].S[0].inVan == False & van[x].mid == False & van[x].currentNode != van[x].S[0].pLocation):
+                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].pLocation)[1]
+                if (van[x].S[0].inVan == True & van[x].mid == False & van[x].currentNode != van[x].S[0].dLocation):
+                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].dLocation)[1]
+                if van[x].nextNode != van[x].currentNode & van[x].mid == False: # when van is 1 mile away, go halfway
+                    van[x].mid = True
+                    van[x].currentNode = van[x].nextNode
+                elif van[x].nextNode == van[x].currentNode & van[x].mid == True:
+                    van[x].mid = False
+                if (van[x].S[0].pLocation == van[x].currentNode & van[x].S[0].inVan == False & van[x].mid == False):
+                    van[x].S[0].inVan = True
+                    print("Person at ", van[x].currentNode, " picked up.")
+                    # schedule dropoff
+
 
         print("Tick: " + str(tick / 4))
-    if(tick % 16 == 0):
-        #insert scripts for every 4 clock ticks here
-        print("4thTick: " + str(tick / 16))
-        assignVan(people, van)
-        #for x in van:
 
-        for x in people:
-            print(x.pLocation, " " , x.dLocation)
-            people.pop()
+
 
     #animation scripts here
     # records each location of van for each tick
