@@ -175,6 +175,62 @@ def pickupSchedule(van):
                 van.S.append(t2)
                 van.S.append(t1)
 
+
+def dropScheduler(van):
+    size = len(van.S)
+    if size < 1:
+        return 0
+    t1 = van.S.pop(0)
+    p1 = nx.astar_path_length(G, van.currentNode, t1.dLocation)
+    if size > 1:
+        t2 = van.S.pop(0)
+        if t2.inVan == False:
+            p2 = nx.astar_path_length(G, van.currentNode, t2.pLocation)
+            p1b = nx.astar_path_length(G, t2.pLocation, t1.dLocation)
+        else:
+            p2 = nx.astar_path_length(G, van.currentNode, t2.dLocation)
+            p1b = nx.astar_path_length(G, t2.dLocation, t1.dLocation)
+
+    if size == 3:
+        t3 = van.S.pop(0)
+        if t2.inVan == False:
+            if t3.inVan == False:
+                p3b = nx.astar_path_length(G, t2.pLocation, t3.pLocation)
+            else:
+                p3b = nx.astar_path_length(G, t2.pLocation, t3.dLocation)
+        else:
+            if t3.inVan == False:
+                p3b = nx.astar_path_length(G, t2.dLocation, t3.pLocation)
+            else:
+                p3b = nx.astar_path_length(G, t2.dLocation, t3.dLocation)
+
+
+    if size == 1:
+        van.S.append(t1)
+    elif size > 1:
+        if size == 3:
+            if p1 < p2:
+                van.S.append(t1)
+                van.S.append(t2)
+                van.S.append(t3)
+            elif p1b < p3b:
+                van.S.append(t2)
+                van.S.append(t1)
+                van.S.append(t3)
+            else:
+                van.S.append(t2)
+                van.S.append(t3)
+                van.S.append(t1)
+        else:
+            if p1 < p2:
+                van.S.append(t1)
+                van.S.append(t2)
+            else:
+                van.S.append(t2)
+                van.S.append(t1)
+
+
+
 #initialize vans here
 numberOfVans = 1 # set to 30 later
 van = []
@@ -207,7 +263,7 @@ for tick in range(runTime * 4):
                 if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
                     van[x].S[0].inVan = True
                     print("Person at ", van[x].currentNode, " picked up.")
-                    # schedule dropoff
+                    dropScheduler(van[x]) # schedule dropoff
                 # set nextnode as first element in path from current node to first S location
                 print("Person Location: ", van[x].S[0].pLocation, " , ", van[x].S[0].dLocation)
                 if (van[x].S[0].inVan == False and van[x].mid == False and van[x].currentNode != van[x].S[0].pLocation):
@@ -225,7 +281,7 @@ for tick in range(runTime * 4):
                 if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
                     van[x].S[0].inVan = True
                     print("Person at ", van[x].currentNode, " picked up.")
-                    # schedule dropoff
+                    dropScheduler(van[x]) # schedule dropoff
         print("Tick: " + str(tick / 4))
 
     #animation scripts here
