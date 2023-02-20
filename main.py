@@ -110,15 +110,15 @@ def assignVan(people, van):
                 tempVan = y
         tempVan.R.append(x) # add person to R list
    # for x in van: # print R list
-    #    print("R:")
+        # print("R:")
       #  for y in x.R:
       #      print(y.pLocation)
 
 def pickupSchedule(van):
-    if len(van.R) == 1 & len(van.S) <=2: # if only p1 in R queue
+    if len(van.R) == 1 and len(van.S) <=2: # if only p1 in R queue
         print("Got Here 1")
         van.S.append(van.R.pop(0)) # append p1 pLocation to S
-    if len(van.R) == 2 & len(van.S) <=1: # if p1 and p2 in R queue
+    if len(van.R) == 2 and len(van.S) <=1: # if p1 and p2 in R queue
         print("Got Here 2")
         t1 = van.R.pop(0) # t(#) for temp person pickup location, pops queue
         t2 = van.R.pop(0)
@@ -130,7 +130,7 @@ def pickupSchedule(van):
         else:
             van.S.append(t2)
             van.S.append(t1)
-    if len(van.R) >= 3 & len(van.S) ==0 : # if p1, p2 and p3 in R queue
+    if len(van.R) >= 3 and len(van.S) ==0 : # if p1, p2 and p3 in R queue
         print("Got Here 3")
         t1 = van.R.pop(0)
         t2 = van.R.pop(0)
@@ -138,7 +138,7 @@ def pickupSchedule(van):
         p1 = nx.astar_path_length(G, van.currentNode, t1.pLocation)
         p2 = nx.astar_path_length(G, van.currentNode, t2.pLocation)
         p3 = nx.astar_path_length(G, van.currentNode, t3.pLocation)
-        if p1 < p2 & p1 < p3:
+        if p1 < p2 and p1 < p3:
             van.S.append(t1)
 
             tp2 = nx.astar_path_length(G, t1.pLocation, t2.pLocation)
@@ -150,7 +150,7 @@ def pickupSchedule(van):
             else:
                 van.S.append(t3)
                 van.S.append(t2)
-        elif p2 < p1 & p2 < p3:
+        elif p2 < p1 and p2 < p3:
             van.S.append(t2)
 
             tp1 = nx.astar_path_length(G, t2.pLocation, t1.pLocation)
@@ -199,32 +199,39 @@ for tick in range(runTime * 4):
         generatePeople(people)
         for x in range(numberOfVans):
             print("Van Location: ", van[x].currentNode)
+
             if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
-                # set nextnode as first element in path from current node to first S location
-                if (van[x].S[0].inVan == False & van[x].mid == False & van[x].currentNode != van[x].S[0].pLocation):
-                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].pLocation)[1]
-                if (van[x].S[0].inVan == True & van[x].mid == False & van[x].currentNode != van[x].S[0].dLocation):
-                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].dLocation)[1]
-                if van[x].nextNode != van[x].currentNode & van[x].mid == False: # when van is 1 mile away, go halfway
-                    van[x].mid = True
-                    van[x].currentNode = van[x].nextNode
-                elif van[x].nextNode == van[x].currentNode & van[x].mid == True:
-                    van[x].mid = False
-                if (van[x].S[0].pLocation == van[x].currentNode & van[x].S[0].inVan == False & van[x].mid == False):
+                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False):
+                    print("Person at ", van[x].currentNode, " dropped off.")
+                    van[x].S.pop(0)
+                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
                     van[x].S[0].inVan = True
                     print("Person at ", van[x].currentNode, " picked up.")
                     # schedule dropoff
-
-
+                # set nextnode as first element in path from current node to first S location
+                print("Person Location: ", van[x].S[0].pLocation, " , ", van[x].S[0].dLocation)
+                if (van[x].S[0].inVan == False and van[x].mid == False and van[x].currentNode != van[x].S[0].pLocation):
+                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].pLocation)[1]
+                elif (van[x].S[0].inVan == True and van[x].mid == False and van[x].currentNode != van[x].S[0].dLocation):
+                    van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].dLocation)[1]
+                if van[x].nextNode != van[x].currentNode and van[x].mid == False: # when van is 1 mile away, go halfway
+                    van[x].mid = True
+                    van[x].currentNode = van[x].nextNode
+                elif van[x].nextNode == van[x].currentNode and van[x].mid == True:
+                    van[x].mid = False
+                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False):
+                    print("Person at ", van[x].currentNode, " dropped off.")
+                    van[x].S.pop(0)
+                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
+                    van[x].S[0].inVan = True
+                    print("Person at ", van[x].currentNode, " picked up.")
+                    # schedule dropoff
         print("Tick: " + str(tick / 4))
-
-
 
     #animation scripts here
     # records each location of van for each tick
     for i in range(numberOfVans):
         van[i].xyData.append(anim_lerp(van[i].currentNode, van[i].nextNode, ((tick % 8)/4), pos))
-
 
 ### ANIMATION
 fig = plt.gcf()
@@ -233,7 +240,6 @@ ax = fig.gca()
 graphVans = {}
 for n in range(numberOfVans):
     graphVans[n] = plt.Circle((van[n].xyData[0]), .05, zorder=10)
-
 
 def anim_init():
     for n in range(numberOfVans):
