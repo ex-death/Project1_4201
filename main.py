@@ -44,7 +44,7 @@ nx.draw_networkx_edge_labels(G, pos, edge_labels)
 ### End Tutorial Block
 
 ### Start Algorithms
-import random
+
 
 ### Class Declarations
 class Van:
@@ -114,6 +114,64 @@ def assignVan(people, van):
         for y in x.R:
             print(y.pLocation)
 
+def schedule(van):
+    if len(van.R) == 1: # if only p1 in R queue
+        van.S.append(van.R.pop().pLocation) # append p1 pLocation to S
+    if len(van.R) == 2: # if p1 and p2 in R queue
+        t1 = van.R.pop().pLocation # t(#) for temp person pickup location, pops queue
+        t2 = van.R.pop().pLocation
+        p1 = nx.astar_path_length(G, van.currentNode, t1) # p(#) for the distance from van to corresponding pLocation
+        p2 = nx.astar_path_length(G, van.currentNode, t2)
+        if p1 < p2: # if distance to p1 is less than distance to p2
+            van.S.append(t1) # append p1 then p2 pLocation to S
+            van.S.append(t2)
+        else:
+            van.S.append(t2)
+            van.S.append(t1)
+    if len(van.R) == 3: # if p1, p2 and p3 in R queue
+        t1 = van.R.pop().pLocation
+        t2 = van.R.pop().pLocation
+        t3 = van.R.pop().pLocation
+        p1 = nx.astar_path_length(G, van.currentNode, t1)
+        p2 = nx.astar_path_length(G, van.currentNode, t2)
+        p3 = nx.astar_path_length(G, van.currentNode, t3)
+        if p1 < p2 & p1 < p3:
+            van.S.append(t1)
+
+            tp2 = nx.astar_path_length(G, t1, t2)
+            tp3 = nx.astar_path_length(G, t1, t3)
+
+            if tp2 < tp3:
+                van.S.append(t2)
+                van.S.append(t3)
+            else:
+                van.S.append(t3)
+                van.S.append(t2)
+        elif p2 < p1 & p2 < p3:
+            van.S.append(t2)
+
+            tp1 = nx.astar_path_length(G, t2, t1)
+            tp3 = nx.astar_path_length(G, t2, t3)
+
+            if tp1 < tp3:
+                van.S.append(t1)
+                van.S.append(t3)
+            else:
+                van.S.append(t3)
+                van.S.append(t1)
+        else:
+            van.S.append(t3)
+
+            tp1 = nx.astar_path_length(G, t3, t1)
+            tp2 = nx.astar_path_length(G, t3, t2)
+
+            if tp1 < tp2:
+                van.S.append(t1)
+                van.S.append(t2)
+            else:
+                van.S.append(t2)
+                van.S.append(t1)
+
 
 #initialize vans here
 numberOfVans = 1 # set to 30 later
@@ -138,7 +196,9 @@ for tick in range(runTime * 4):
     if(tick % 4 == 0): # every 4 "ticks" = 1 clock tick
         #insert scripts for every tick here
         generatePeople(people)
-
+        for x in range(numberOfVans):
+            if len(van[x].R) > 0: #check contents of R, if not empty, schedule
+                schedule(van[x])
         print("Tick: " + str(tick / 4))
     if(tick % 16 == 0):
         #insert scripts for every 4 clock ticks here
@@ -180,7 +240,7 @@ def anim_run(i):
 # circle.center = anim_lerp(0, 3, 1, pos)
 # ax.add_patch(circle)
 
-anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=150)
+#anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=150)
 
 plt.show()
 
