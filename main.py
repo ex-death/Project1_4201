@@ -50,12 +50,12 @@ nx.draw_networkx_edge_labels(G, pos, edge_labels)
 class Van:
     def __init__(self, startPos):
         self.currentNode = startPos
-        self.Hist = [startPos]
 
     nextNode = 0
     xyData = []
     R = []
     S = []
+    mid = False # distance traveled from current node to next node, true meaning distance = halfway
 class Person:
     def __init__(self, pickUp, dropOff):
         self.pLocation = pickUp
@@ -197,13 +197,25 @@ for tick in range(runTime * 4):
         #insert scripts for every tick here
         generatePeople(people)
         for x in range(numberOfVans):
+            if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
+                #set nextnode as first element in path from current node to first S location
+                van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0])[0]
             if len(van[x].R) > 0: #check contents of R, if not empty, schedule
                 schedule(van[x])
+            if van[x].nextNode == van[x].currentNode & van[x].mid == True: # when van arrives to next node
+                van[x].S.pop() # pop node from S
+                # do person is dropped off/picked up
+            elif van[x].nextNode != van[x].currentNode & van[x].mid == False: # when van is 1 mile away, go halfway
+                van[x].mid = True
+                van[x].currentNode = van[x].nextNode
+
         print("Tick: " + str(tick / 4))
     if(tick % 16 == 0):
         #insert scripts for every 4 clock ticks here
         print("4thTick: " + str(tick / 16))
         assignVan(people, van)
+        #for x in van:
+
         for x in people:
             print(x.pLocation, " " , x.dLocation)
             people.pop()
