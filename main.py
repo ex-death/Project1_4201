@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import random
 from matplotlib.animation import FuncAnimation
 
-
 ### Tutorial Block
 import networkx as nx
 from networkx.drawing.nx_agraph import write_dot
@@ -16,8 +15,6 @@ print ( G.nodes() )
 print(nx.is_connected(G))
 
 print(G.edges())
-
-
 
 # some properties
 print("node degree and node clustering")
@@ -45,12 +42,10 @@ nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
 ### Start Algorithms
 
-
 ### Class Declarations
 class Van:
     def __init__(self, startPos):
         self.currentNode = startPos
-
     nextNode = 0
     xyData = []
     R = []
@@ -61,7 +56,6 @@ class Person:
         self.pLocation = pickUp
         self.dLocation = dropOff
         self.inVan = False
-
 
 # interpolate coordinates between two point with time as percentage
 # ex. time = .5 = halfway between
@@ -140,7 +134,6 @@ def pickupSchedule(van):
         p3 = nx.astar_path_length(G, van.currentNode, t3.pLocation)
         if p1 < p2 and p1 < p3:
             van.S.append(t1)
-
             tp2 = nx.astar_path_length(G, t1.pLocation, t2.pLocation)
             tp3 = nx.astar_path_length(G, t1.pLocation, t3.pLocation)
 
@@ -152,7 +145,6 @@ def pickupSchedule(van):
                 van.S.append(t2)
         elif p2 < p1 and p2 < p3:
             van.S.append(t2)
-
             tp1 = nx.astar_path_length(G, t2.pLocation, t1.pLocation)
             tp3 = nx.astar_path_length(G, t2.pLocation, t3.pLocation)
 
@@ -164,7 +156,6 @@ def pickupSchedule(van):
                 van.S.append(t1)
         else:
             van.S.append(t3)
-
             tp1 = nx.astar_path_length(G, t3.pLocation, t1.pLocation)
             tp2 = nx.astar_path_length(G, t3.pLocation, t2.pLocation)
 
@@ -174,7 +165,6 @@ def pickupSchedule(van):
             else:
                 van.S.append(t2)
                 van.S.append(t1)
-
 
 def dropScheduler(van):
     size = len(van.S)
@@ -204,7 +194,6 @@ def dropScheduler(van):
             else:
                 p3b = nx.astar_path_length(G, t2.dLocation, t3.dLocation)
 
-
     if size == 1:
         van.S.append(t1)
     elif size > 1:
@@ -228,8 +217,6 @@ def dropScheduler(van):
             else:
                 van.S.append(t2)
                 van.S.append(t1)
-
-
 
 #initialize vans here
 numberOfVans = 1 # set to 30 later
@@ -257,10 +244,10 @@ for tick in range(runTime * 4):
             print("Van Location: ", van[x].currentNode)
 
             if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
-                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False):
+                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
                     print("Person at ", van[x].currentNode, " dropped off.")
                     van[x].S.pop(0)
-                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
+                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False and len(van[x].S) > 0):
                     van[x].S[0].inVan = True
                     print("Person at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
@@ -275,10 +262,10 @@ for tick in range(runTime * 4):
                     van[x].currentNode = van[x].nextNode
                 elif van[x].nextNode == van[x].currentNode and van[x].mid == True:
                     van[x].mid = False
-                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False):
+                if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
                     print("Person at ", van[x].currentNode, " dropped off.")
                     van[x].S.pop(0)
-                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False):
+                if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False and len(van[x].S) > 0):
                     van[x].S[0].inVan = True
                     print("Person at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
@@ -303,12 +290,10 @@ def anim_init():
         ax.add_patch(graphVans[n])
     return graphVans.values()
 
-
 def anim_run(i):
     for n in range(numberOfVans):
         graphVans[n].center = van[n].xyData[i]
     return graphVans.values()
-
 
 # circle = plt.Circle((anim_lerp(0, 3, .5, pos)), .05, zorder=10)
 # circle.center = anim_lerp(0, 3, 1, pos)
@@ -317,4 +302,3 @@ def anim_run(i):
 #anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=150)
 
 plt.show()
-
