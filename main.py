@@ -69,9 +69,10 @@ def anim_lerp(a, b, time, pos):
 
 def generatePeople(people):
     # need 7.5 people needing rides per tick
+    print("\tGenerating requests:")
     if (random.randint(0, 1) == 1):
         # make 8 people
-        for i in range(2): # make 8 later
+        for i in range(8): # make 8 later
             # generate random pickup & dropoff
             pickup = random.randint(0, 9)
             dropoff = random.randint(0, 9)
@@ -81,9 +82,10 @@ def generatePeople(people):
             # create person and add to waitlist
             guy = Person(pickup, dropoff)
             people.append(guy)
+            print("\t\tPerson ", i, " at ", guy.pLocation," going to ",guy.dLocation)
     else:
         # make 7 people
-        for i in range(2): #make 7 later
+        for i in range(7): #make 7 later
             # generate random pickup & dropoff
             pickup = random.randint(0, 9)
             dropoff = random.randint(0, 9)
@@ -93,6 +95,7 @@ def generatePeople(people):
             # create person and add to waitlist
             guy = Person(pickup, dropoff)
             people.append(guy)
+            print("\t\tPerson ", i, " at ", guy.pLocation," going to ",guy.dLocation)
 
 def assignVan(people, van):
     cost = 9999 # set cost high
@@ -219,7 +222,7 @@ def dropScheduler(van):
                 van.S.append(t1)
 
 #initialize vans here
-numberOfVans = 1 # set to 30 later
+numberOfVans = 30 # set to 30 later
 van = []
 for i in range(numberOfVans):
     van.append(Van(random.randint(0, 9)))
@@ -232,27 +235,30 @@ runTime = 20 #number of ticks, increase later
 for tick in range(runTime * 4):
     if (tick % 16 == 0):
         # insert scripts for every 4 clock ticks here
-        print("4thTick: " + str(tick / 16))
+        print("4thTick: " + str(int(tick / 16) + 1))
         assignVan(people, van)
         for x in range(numberOfVans):
             if len(van[x].R) > 0:  # check contents of R, if not empty, schedule
                 pickupSchedule(van[x])
     if(tick % 4 == 0): # every 4 "ticks" = 1 clock tick
         #insert scripts for every tick here
+        print("Tick: " + str(int(tick / 4) + 1))
         generatePeople(people)
         for x in range(numberOfVans):
-            print("Van Location: ", van[x].currentNode)
+            print("\tVan ", format(x + 1, '>2'), " Location: ", van[x].currentNode)
 
             if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
                 if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
-                    print("Person at ", van[x].currentNode, " dropped off.")
+                    print("\t\tPerson at ", van[x].currentNode, " dropped off.")
                     van[x].S.pop(0)
+                    x -= 1
+                    continue
                 if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False and len(van[x].S) > 0):
                     van[x].S[0].inVan = True
-                    print("Person at ", van[x].currentNode, " picked up.")
+                    print("\t\tPerson at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
                 # set nextnode as first element in path from current node to first S location
-                print("Person Location: ", van[x].S[0].pLocation, " , ", van[x].S[0].dLocation)
+                #print("Person Location: ", van[x].S[0].pLocation, " , ", van[x].S[0].dLocation)
                 if (van[x].S[0].inVan == False and van[x].mid == False and van[x].currentNode != van[x].S[0].pLocation):
                     van[x].nextNode = nx.astar_path(G, van[x].currentNode, van[x].S[0].pLocation)[1]
                 elif (van[x].S[0].inVan == True and van[x].mid == False and van[x].currentNode != van[x].S[0].dLocation):
@@ -263,13 +269,15 @@ for tick in range(runTime * 4):
                 elif van[x].nextNode == van[x].currentNode and van[x].mid == True:
                     van[x].mid = False
                 if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
-                    print("Person at ", van[x].currentNode, " dropped off.")
+                    print("\t\tPerson at ", van[x].currentNode, " dropped off.")
                     van[x].S.pop(0)
+                    x -= 1
+                    continue
                 if (van[x].S[0].pLocation == van[x].currentNode and van[x].S[0].inVan == False and van[x].mid == False and len(van[x].S) > 0):
                     van[x].S[0].inVan = True
-                    print("Person at ", van[x].currentNode, " picked up.")
+                    print("\t\tPerson at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
-        print("Tick: " + str(tick / 4))
+
 
     #animation scripts here
     # records each location of van for each tick
