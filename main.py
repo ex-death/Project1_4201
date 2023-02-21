@@ -46,11 +46,12 @@ nx.draw_networkx_edge_labels(G, pos, edge_labels)
 class Van:
     def __init__(self, startPos):
         self.currentNode = startPos
-    nextNode = 0
+        self.nextNode = 0
+        self.R = []
+        self.S = []
+        self.mid = False  # distance traveled from current node to next node, true meaning distance = halfway
     xyData = []
-    R = []
-    S = []
-    mid = False # distance traveled from current node to next node, true meaning distance = halfway
+
 class Person:
     def __init__(self, pickUp, dropOff):
         self.pLocation = pickUp
@@ -98,25 +99,31 @@ def generatePeople(people):
             print("\t\tPerson ", i, " at ", guy.pLocation," going to ",guy.dLocation)
 
 def assignVan(people, van):
-    cost = 9999 # set cost high
+    print("\tAssigning Vans:")
     while people: # while people are still on waitlist
-        x = people.pop() # remove person from waitlist
-        for y in van: # run through vans
-            tempCost = nx.astar_path_length(G, y.currentNode, x.pLocation) # find a* path cost
+        cost = 9999  # set cost high
+        x = people.pop(0) # remove person from waitlist
+        for y in range(numberOfVans): # run through vans
+            if len(van[y].R) > 4:
+                continue
+            tempCost = nx.astar_path_length(G, van[y].currentNode, x.pLocation) # find a* path cost
             if tempCost < cost: # if the cost of the new path is less than the current cost, set this as new shortest path
+                cost = tempCost
                 tempVan = y
-        tempVan.R.append(x) # add person to R list
-   # for x in van: # print R list
-        # print("R:")
-      #  for y in x.R:
-      #      print(y.pLocation)
+        van[tempVan].R.append(x) # add person to R list
+        print("\t\tVan ", format(tempVan + 1, '>2'), " goes to ", x.pLocation)
+
+    # for x in van: # print R list
+    #     print("R:")
+    #     for y in x.R:
+    #         print(y.pLocation)
 
 def pickupSchedule(van):
     if len(van.R) == 1 and len(van.S) <=2: # if only p1 in R queue
-        print("Got Here 1")
+        # print("Got Here 1")
         van.S.append(van.R.pop(0)) # append p1 pLocation to S
     if len(van.R) == 2 and len(van.S) <=1: # if p1 and p2 in R queue
-        print("Got Here 2")
+        # print("Got Here 2")
         t1 = van.R.pop(0) # t(#) for temp person pickup location, pops queue
         t2 = van.R.pop(0)
         p1 = nx.astar_path_length(G, van.currentNode, t1.pLocation) # p(#) for the distance from van to corresponding pLocation
@@ -128,7 +135,7 @@ def pickupSchedule(van):
             van.S.append(t2)
             van.S.append(t1)
     if len(van.R) >= 3 and len(van.S) ==0 : # if p1, p2 and p3 in R queue
-        print("Got Here 3")
+        # print("Got Here 3")
         t1 = van.R.pop(0)
         t2 = van.R.pop(0)
         t3 = van.R.pop(0)
