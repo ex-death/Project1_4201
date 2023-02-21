@@ -245,8 +245,7 @@ for tick in range(runTime * 4):
         print("Tick: " + str(int(tick / 4) + 1))
         generatePeople(people)
         for x in range(numberOfVans):
-            print("\tVan ", format(x + 1, '>2'), " Location: ", van[x].currentNode)
-
+            print("\tVan ", format(x + 1, '>2'), " Location: ", van[x].currentNode, " R(amt): ", len(van[x].R), " S(amt): ", len(van[x].S))
             if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
                 if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
                     print("\t\tPerson at ", van[x].currentNode, " dropped off.")
