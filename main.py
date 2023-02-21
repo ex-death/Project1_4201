@@ -5,23 +5,13 @@ from matplotlib.animation import FuncAnimation
 
 ### Tutorial Block
 import networkx as nx
-from networkx.drawing.nx_agraph import write_dot
-from networkx.drawing.nx_pydot import write_dot
 seed=1000           # seed the graph for reproducibility, you should be doing this
-numberOfNodes = 10
-G= nx.gnp_random_graph (numberOfNodes, .3, seed=seed )       # here we create a random binomial graph with 10 nodes and an average (expected) connectivity of 10*.3= 3.
+numberOfNodes = 100
+G= nx.gnp_random_graph (numberOfNodes, .2, seed=seed )  # here we create a random binomial graph with 100 nodes and an average (expected) connectivity of 10*.3= 3.
 print ( G.nodes() )
-
-print(nx.is_connected(G))
 
 print(G.edges())
 
-# some properties
-print("node degree and node clustering")
-for v in nx.nodes(G):
-    print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
-
-print()
 print("the adjacency list")
 for line in nx.generate_adjlist(G):
     print(line)
@@ -111,12 +101,7 @@ def assignVan(people, van):
                 cost = tempCost
                 tempVan = y
         van[tempVan].R.append(x) # add person to R list
-        print("\t\tVan ", format(tempVan + 1, '>2'), " goes to ", x.pLocation)
-
-    # for x in van: # print R list
-    #     print("R:")
-    #     for y in x.R:
-    #         print(y.pLocation)
+        print("\t\tVan ", format(tempVan + 1, '>2'), " has a new pickup at ", x.pLocation)
 
 def pickupSchedule(van):
     if len(van.R) == 1 and len(van.S) <=2: # if only p1 in R queue
@@ -308,11 +293,5 @@ def anim_run(i):
     for n in range(numberOfVans):
         graphVans[n].center = van[n].xyData[i]
     return graphVans.values()
-
-# circle = plt.Circle((anim_lerp(0, 3, .5, pos)), .05, zorder=10)
-# circle.center = anim_lerp(0, 3, 1, pos)
-# ax.add_patch(circle)
-
-#anim = FuncAnimation(fig, func=anim_run, init_func=anim_init, frames=runTime * 4, interval=150)
 
 plt.show()
