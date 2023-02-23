@@ -130,15 +130,24 @@ def assignVan(people, van):
         print("\t\tVan ", format(tempVan + 1, '>2'), " has a new pickup at ", x.pLocation)
 
 def pickupSchedule(van):
-    if len(van.R) == 1 and len(van.S) <=2: # if only p1 in R queue
+    if (len(van.R) == 1 and len(van.S) <=2) or (len(van.R) > 0 and len(van.S) == 2):
         # print("Got Here 1")
         van.S.append(van.R.pop(0)) # append p1 pLocation to S
-    if len(van.R) == 2 and len(van.S) <=1: # if p1 and p2 in R queue
+    if (len(van.R) == 2 and len(van.S) <=1) or (len(van.R) > 1 and len(van.S) == 1):
         # print("Got Here 2")
         t1 = van.R.pop(0) # t(#) for temp person pickup location, pops queue
         t2 = van.R.pop(0)
-        p1 = nx.astar_path_length(G, van.currentNode, t1.pLocation) # p(#) for the distance from van to corresponding pLocation
-        p2 = nx.astar_path_length(G, van.currentNode, t2.pLocation)
+
+        if (len(van.S) == 1):
+            if (van.S[0].inVan):
+                tempNode = van.S[0].dLocation
+            else:
+                tempNode = van.S[0].pLocation
+        else:
+            tempNode = van.currentNode
+
+        p1 = nx.astar_path_length(G, tempNode, t1.pLocation) # p(#) for the distance from van to corresponding pLocation
+        p2 = nx.astar_path_length(G, tempNode, t2.pLocation)
         if p1 < p2: # if distance to p1 is less than distance to p2
             van.S.append(t1) # append p1 then p2 pLocation to S
             van.S.append(t2)
