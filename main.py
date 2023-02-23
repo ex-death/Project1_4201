@@ -6,8 +6,8 @@ from matplotlib.animation import FuncAnimation
 ### Tutorial Block
 import networkx as nx
 seed=1000           # seed the graph for reproducibility, you should be doing this
-numberOfNodes = 100
-G= nx.gnp_random_graph (numberOfNodes, .2, seed=seed )  # here we create a random binomial graph with 100 nodes and an average (expected) connectivity of 10*.3= 3.
+numberOfNodes = 200
+G= nx.gnp_random_graph (numberOfNodes, .04, seed=seed )  # here we create a random binomial graph with 100 nodes and an average (expected) connectivity of 10*.3= 3.
 print ( G.nodes() )
 
 print(G.edges())
@@ -28,6 +28,7 @@ nx.draw_networkx_labels(G, pos, font_size=20, font_family="sans-serif")
 edge_labels = nx.get_edge_attributes(G, "weight")
 print(edge_labels)
 nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
 ### End Tutorial Block
 
 ### Start Algorithms
@@ -59,17 +60,18 @@ def anim_lerp(a, b, time, pos):
     return newab
 
 def generatePeople(people):
+    maxnode = numberOfNodes - 1
     # need 7.5 people needing rides per tick
     print("\tGenerating requests:")
     if (random.randint(0, 1) == 1):
         # make 8 people
-        for i in range(8): # make 8 later
+        for i in range(10): # make 8 later
             # generate random pickup & dropoff
-            pickup = random.randint(0, 9)
-            dropoff = random.randint(0, 9)
+            pickup = random.randint(0, maxnode)
+            dropoff = random.randint(0, maxnode)
             # make sure they are different
             while pickup == dropoff:
-                dropoff = random.randint(0, 9)
+                dropoff = random.randint(0, maxnode)
             # create person and add to waitlist
             guy = Person(pickup, dropoff)
             people.append(guy)
@@ -78,11 +80,11 @@ def generatePeople(people):
         # make 7 people
         for i in range(7): #make 7 later
             # generate random pickup & dropoff
-            pickup = random.randint(0, 9)
-            dropoff = random.randint(0, 9)
+            pickup = random.randint(0, maxnode)
+            dropoff = random.randint(0, maxnode)
             # make sure they are different
             while pickup == dropoff:
-                dropoff = random.randint(0, 9)
+                dropoff = random.randint(0, maxnode)
             # create person and add to waitlist
             guy = Person(pickup, dropoff)
             people.append(guy)
@@ -90,12 +92,13 @@ def generatePeople(people):
 
 def assignVan(people, van):
     print("\tAssigning Vans:")
+    tempVan = np.random.randint(0, numberOfVans - 1)
     while people: # while people are still on waitlist
         cost = 9999  # set cost high
         x = people.pop(0) # remove person from waitlist
         for y in range(numberOfVans): # run through vans
-            if len(van[y].R) > 4:
-                continue
+            # if len(van[y].R) > 4:
+            #     continue
             tempCost = nx.astar_path_length(G, van[y].currentNode, x.pLocation) # find a* path cost
             if tempCost < cost: # if the cost of the new path is less than the current cost, set this as new shortest path
                 cost = tempCost
@@ -161,6 +164,7 @@ def pickupSchedule(van):
                 van.S.append(t2)
                 van.S.append(t1)
 
+
 def dropScheduler(van):
     size = len(van.S)
     if size < 1:
@@ -216,13 +220,21 @@ def dropScheduler(van):
 #initialize vans here
 numberOfVans = 30 # set to 30 later
 van = []
+tripCount = 0
+edgeCount = 0
 for i in range(numberOfVans):
     van.append(Van(random.randint(0, 9)))
+
 
 #initialize list of people
 people = []
 
-runTime = 20 #number of ticks, increase later
+
+
+# np.zeros(tripCount, dtype=int)
+# np.zeros(edgeCount, dtype=int)
+
+runTime = 480 #number of ticks, increase later
 #ticks script here - ticks * 4 to accomodate for animation
 for tick in range(runTime * 4):
     if (tick % 16 == 0):
@@ -237,7 +249,7 @@ for tick in range(runTime * 4):
         print("Tick: " + str(int(tick / 4) + 1))
         generatePeople(people)
         for x in range(numberOfVans):
-            print("\tVan ", format(x + 1, '>2'), " Location: ", van[x].currentNode, " R(amt): ", len(van[x].R), " S(amt): ", len(van[x].S))
+            print("\tVan ", format(x + 1, '>2'), " Location: ", format(van[x].currentNode, '>3'), " R(amt): ", format(len(van[x].R), '>2'), " S(amt): ", len(van[x].S))
             if len(van[x].S) > 0: # if location scheduled in S, set nextNode to next in path
                 if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
                     print("\t\tPerson at ", van[x].currentNode, " dropped off.")
@@ -248,6 +260,7 @@ for tick in range(runTime * 4):
                     van[x].S[0].inVan = True
                     print("\t\tPerson at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
+                    tripCount += 1
                 # set nextnode as first element in path from current node to first S location
                 #print("Person Location: ", van[x].S[0].pLocation, " , ", van[x].S[0].dLocation)
                 if (van[x].S[0].inVan == False and van[x].mid == False and van[x].currentNode != van[x].S[0].pLocation):
@@ -259,6 +272,7 @@ for tick in range(runTime * 4):
                     van[x].currentNode = van[x].nextNode
                 elif van[x].nextNode == van[x].currentNode and van[x].mid == True:
                     van[x].mid = False
+                    edgeCount += 1
                 if (van[x].S[0].dLocation == van[x].currentNode and van[x].S[0].inVan == True and van[x].mid == False and len(van[x].S) > 0):
                     print("\t\tPerson at ", van[x].currentNode, " dropped off.")
                     van[x].S.pop(0)
@@ -268,12 +282,18 @@ for tick in range(runTime * 4):
                     van[x].S[0].inVan = True
                     print("\t\tPerson at ", van[x].currentNode, " picked up.")
                     dropScheduler(van[x]) # schedule dropoff
+                    tripCount +=1
+
+
 
 
     #animation scripts here
     # records each location of van for each tick
     for i in range(numberOfVans):
         van[i].xyData.append(anim_lerp(van[i].currentNode, van[i].nextNode, ((tick % 8)/4), pos))
+
+print("Average Trips Taken: ", tripCount/numberOfVans)
+print("Average Edges Traveled: ", edgeCount/numberOfVans)
 
 ### ANIMATION
 fig = plt.gcf()
