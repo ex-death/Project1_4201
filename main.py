@@ -1,14 +1,37 @@
 import numpy as np
+from itertools import combinations, groupby
 import matplotlib.pyplot as plt
 import random
 from matplotlib.animation import FuncAnimation
+
+def gnp_random_connected_graph(n, p):
+    """
+    Generates a random undirected graph, similarly to an Erdős-Rényi
+    graph, but enforcing that the resulting graph is conneted
+    """
+    edges = combinations(range(n), 2)
+    G = nx.Graph()
+    G.add_nodes_from(range(n))
+    if p <= 0:
+        return G
+    if p >= 1:
+        return nx.complete_graph(n, create_using=G)
+    for _, node_edges in groupby(edges, key=lambda x: x[0]):
+        node_edges = list(node_edges)
+        random_edge = random.choice(node_edges)
+        G.add_edge(*random_edge)
+        for e in node_edges:
+            if random.random() < p:
+                G.add_edge(*e)
+    return G
+
 
 ### Tutorial Block
 import networkx as nx
 seed=1000           # seed the graph for reproducibility, you should be doing this
 numberOfNodes = 200
-G= nx.gnp_random_graph (numberOfNodes, .04, seed=seed )  # here we create a random binomial graph with 100 nodes and an average (expected) connectivity of 10*.3= 3.
-print ( G.nodes() )
+G= gnp_random_connected_graph (numberOfNodes, .01)  # here we create a random binomial graph with 100 nodes and an average (expected) connectivity of 10*.3= 3.
+
 
 print(G.edges())
 
@@ -97,8 +120,8 @@ def assignVan(people, van):
         cost = 9999  # set cost high
         x = people.pop(0) # remove person from waitlist
         for y in range(numberOfVans): # run through vans
-            # if len(van[y].R) > 4:
-            #     continue
+            if len(van[y].R) > 3 and (random.randint(0, 1) == 1):
+                continue
             tempCost = nx.astar_path_length(G, van[y].currentNode, x.pLocation) # find a* path cost
             if tempCost < cost: # if the cost of the new path is less than the current cost, set this as new shortest path
                 cost = tempCost
@@ -218,7 +241,7 @@ def dropScheduler(van):
                 van.S.append(t1)
 
 #initialize vans here
-numberOfVans = 30 # set to 30 later
+numberOfVans = 60 # set to 30 later
 van = []
 tripCount = 0
 edgeCount = 0
